@@ -1,0 +1,21 @@
+<div> 
+  <div class="form-group">
+      <label>Map</label>
+      <input class="form-control" name="map" [(ngModel)]="map" />
+  </div>
+  <div class="form-group">
+      <label>Energy</label>
+      <input type="number" class="form-control" name="steps" [(ngModel)]="steps" />
+  </div>
+  <div class="form-group">
+      <button class="btn btn-default" (click)="getCommands()">Добавить</button>
+  </div>
+</div>
+
+<table id="map"></table>
+
+<div><h3>Расчитать наикратчайший путь</h3>
+  <ul *ngFor="let result of results">
+      <li>{{result}}</li>
+  </ul>
+</div>
