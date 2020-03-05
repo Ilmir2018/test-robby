@@ -51,12 +51,18 @@ export class AppComponent {
 
   results = [];
 
+  /**
+   * Функция выполняется при нажатии на кнопку расчитать.
+   */
   getCommands() {
     this.creatingATable();
     this.getCoordinates(this.startPoint, this.targetPoint, this.blockedPoints);
     this.results.push('[' + this.resultArray + ']');
   }
 
+  /**
+   * Функция занимается созданием поля.
+   */
   creatingATable() {
     let arr = this.map.split('', this.map.length);
     this.containerElement = document.getElementById('map');
@@ -75,6 +81,12 @@ export class AppComponent {
     }
   }
 
+  /**
+   * Функция присваивает нужный класс разным точкам для понятного
+   * и корректного отображения
+   * @param element номер элемента
+   * @param cell текущая ячейка
+   */
   fields(element: string, cell: HTMLElement) {
     switch (element) {
       case this.Fields.WALKABLE:
@@ -94,6 +106,14 @@ export class AppComponent {
     }
   }
 
+  /**
+   * Функция получает координаты стартовой и конечной точки и из строк
+   * делает числа. Так же мы определяем есть ли точки блоков чтобы не 
+   * совершать лишних действий.
+   * @param startPoint стартовая точка
+   * @param targetPoint целевая точка
+   * @param blockedPoints массив блокированных точек.
+   */
   getCoordinates(startPoint, targetPoint, blockedPoints) {
     this.startPointX = Number.parseInt(startPoint[1]);
     this.startPointY = Number.parseInt(startPoint[0]);
@@ -110,7 +130,7 @@ export class AppComponent {
         object.yPoint = element[0];
         this.blockedPointsArray.push(object);
       });
-      // this.calculationOfPossibleMovesWithBlocked(this.startPointX, this.targetPointX, this.startPointY, this.targetPointY, this.blockedPointsArray);
+      // Функция выполняемая если есть блокированные клетки.
     }
     if (this.steps < 0 || this.steps == null) {
       this.resultArray = [];
@@ -118,23 +138,29 @@ export class AppComponent {
     console.log(this.resultArray);
   }
 
+  /**
+   * Узнав стартовые координаты x и y и координаты нашеей цели, мы в зависимости от того
+   * где находится наша цель и стартовая точка совершаем определённые действия.
+   * @param startPointX стартовая точка по x
+   * @param targetPointX целевая точка по x 
+   * @param startPointY стартовая точка по y
+   * @param targetPointY целевая точка по y
+   */
   calculationOfPossibleMoves(startPointX, targetPointX, startPointY, targetPointY) {
     if (startPointX < targetPointX && startPointY < targetPointY) {
       this.direction = this.Directions.East;
-      this.steps--;
       this.resultArray.push(this.Commands.TURN_RIGHT);
       this.pointsXIncrease(startPointX, targetPointX);
       this.direction = this.Directions.South;
-      this.steps--;
+      this.steps -= 2;
       this.resultArray.push(this.Commands.TURN_RIGHT);
       this.pointsYIncrease(startPointY, targetPointY);
     } else if (startPointX > targetPointX && startPointY < targetPointY) {
       this.direction = this.Directions.West;
-      this.steps--;
       this.resultArray.push(this.Commands.TURN_LEFT);
       this.pointsXDecrease(startPointX, targetPointX);
       this.direction = this.Directions.South;
-      this.steps--;
+      this.steps -= 2;
       this.resultArray.push(this.Commands.TURN_LEFT);
       this.pointsYIncrease(startPointY, targetPointY);
     } else if (startPointX > targetPointX && startPointY > targetPointY) {
@@ -151,10 +177,9 @@ export class AppComponent {
       this.pointsXIncrease(startPointX, targetPointX);
     } else if (startPointX === targetPointX && startPointY < targetPointY) {
       this.direction = this.Directions.East;
-      this.steps--;
       this.resultArray.push(this.Commands.TURN_RIGHT);
       this.direction = this.Directions.South;
-      this.steps--;
+      this.steps -= 2;
       this.resultArray.push(this.Commands.TURN_RIGHT);
       this.pointsYIncrease(startPointY, targetPointY);
     } else if (startPointX === targetPointX && startPointY > targetPointY) {
@@ -229,12 +254,6 @@ export class AppComponent {
       startPointY--;
     }
   }
-
-  /**
-   * Функция увеличения значения стартовой точки по X если есть преграды.
-   * @param startPointX 
-   * @param targetPointX 
-   */
 
 }
 

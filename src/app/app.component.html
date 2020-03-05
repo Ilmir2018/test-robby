@@ -11,10 +11,19 @@
       <button class="btn btn-default" (click)="getCommands()">Добавить</button>
   </div>
 </div>
-
+<div class="start"></div>
+<p>Стартовая точка</p>
+<div class="target"></div>
+<p>Целевая точка</p>
+<div class="block"></div>
+<p>Блок</p>
+<div class="north">N</div>
+<div class="south">S</div>
+<div class="east">E</div>
+<div class="west">W</div>
 <table id="map"></table>
 
-<div><h3>Расчитать наикратчайший путь</h3>
+<div class="text"><h3>Расчитать наикратчайший путь</h3>
   <ul *ngFor="let result of results">
       <li>{{result}}</li>
   </ul>
