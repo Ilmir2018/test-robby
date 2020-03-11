@@ -56,7 +56,7 @@ export class AppComponent {
    */
   getCommands() {
     this.creatingATable();
-    this.getCoordinates(this.startPoint, this.targetPoint, this.blockedPoints);
+    this.getCoordinates(this.startPoint, this.targetPoint);
     this.results.push('[' + this.resultArray + ']');
   }
 
@@ -114,29 +114,15 @@ export class AppComponent {
    * @param targetPoint целевая точка
    * @param blockedPoints массив блокированных точек.
    */
-  getCoordinates(startPoint, targetPoint, blockedPoints) {
-    this.startPointX = Number.parseInt(startPoint[1]);
-    this.startPointY = Number.parseInt(startPoint[0]);
-    this.targetPointX = Number.parseInt(targetPoint[1]);
-    this.targetPointY = Number.parseInt(targetPoint[0]);
-    if (blockedPoints.length == 0) {
-      //Выполняется функция при условии что на карте нет блокированных клеток.
-      this.calculationOfPossibleMoves(this.startPointX, this.targetPointX, this.startPointY, this.targetPointY);
-    } else {
-      //Находим координаты клеток куда робот не может сходить.
-      blockedPoints.map((element) => {
-        let object = new Blocked;
-        object.xPoint = element[1];
-        object.yPoint = element[0];
-        this.blockedPointsArray.push(object);
-      });
-      // Функция выполняемая если есть блокированные клетки.
-    }
+  getCoordinates(startPoint, targetPoint) {
+    //Выполняется функция при условии что на карте нет блокированных клеток.
+    this.calculationOfPossibleMoves(startPoint, targetPoint);
     if (this.steps < 0 || this.steps == null) {
       this.resultArray = [];
     }
     console.log(this.resultArray);
   }
+
 
   /**
    * Узнав стартовые координаты x и y и координаты нашеей цели, мы в зависимости от того
@@ -146,55 +132,80 @@ export class AppComponent {
    * @param startPointY стартовая точка по y
    * @param targetPointY целевая точка по y
    */
-  calculationOfPossibleMoves(startPointX, targetPointX, startPointY, targetPointY) {
-    if (startPointX < targetPointX && startPointY < targetPointY) {
-      this.direction = this.Directions.East;
+  calculationOfPossibleMoves(startPoint, targetPoint) {
+    //Находим точки старта и цели по координатам
+    this.startPointX = Number.parseInt(startPoint[1]);
+    this.startPointY = Number.parseInt(startPoint[0]);
+    this.targetPointX = Number.parseInt(targetPoint[1]);
+    this.targetPointY = Number.parseInt(targetPoint[0]);
+    //Находим точки по координатам блоков
+    this.blockedPoints.map((element) => {
+      let object = new Blocked;
+      object.xPoint = element[1];
+      object.yPoint = element[0];
+      this.blockedPointsArray.push(object);
+    });
+    //Делаем проверки по различным направлениям
+    // this.blockedPointsArray.forEach(element => {
+      if (this.startPointX < this.targetPointX && this.startPointY < this.targetPointY) {
+        this.direction = this.Directions.East;
+        this.resultArray.push(this.Commands.TURN_RIGHT);
+        this.pointsIncrease(this.startPointX, this.targetPointX);
+        this.direction = this.Directions.South;
+        this.steps -= 2;
+        this.resultArray.push(this.Commands.TURN_RIGHT);
+        this.pointsIncrease(this.startPointY, this.targetPointY);
+      } else if (this.startPointX > this.targetPointX && this.startPointY < this.targetPointY) {
+        this.direction = this.Directions.West;
+        this.resultArray.push(this.Commands.TURN_LEFT);
+        this.pointsDecrease(this.startPointX, this.targetPointX);
+        this.direction = this.Directions.South;
+        this.steps -= 2;
+        this.resultArray.push(this.Commands.TURN_LEFT);
+        this.pointsIncrease(this.startPointY, this.targetPointY);
+      } else if (this.startPointX > this.targetPointX && this.startPointY > this.targetPointY) {
+        this.pointsDecrease(this.startPointY, this.targetPointY);
+        this.direction = this.Directions.West;
+        this.steps--;
+        this.resultArray.push(this.Commands.TURN_LEFT);
+        this.pointsDecrease(this.startPointX, this.targetPointX);
+      } else if (this.startPointX < this.targetPointX && this.startPointY > this.targetPointY) {
+        this.pointsDecrease(this.startPointY, this.targetPointY);
+        this.direction = this.Directions.East;
+        this.steps--;
+        this.resultArray.push(this.Commands.TURN_RIGHT);
+        this.pointsIncrease(this.startPointX, this.targetPointX);
+      } else if (this.startPointX === this.targetPointX && this.startPointY < this.targetPointY) {
+        this.direction = this.Directions.East;
+        this.resultArray.push(this.Commands.TURN_RIGHT);
+        this.direction = this.Directions.South;
+        this.steps -= 2;
+        this.resultArray.push(this.Commands.TURN_RIGHT);
+        this.pointsIncrease(this.startPointY, this.targetPointY);
+      } else if (this.startPointX === this.targetPointX && this.startPointY > this.targetPointY) {
+        this.pointsDecrease(this.startPointY, this.targetPointY);
+      } else if (this.startPointX < this.targetPointX && this.startPointY === this.targetPointY) {
+        this.direction = this.Directions.East;
+        this.steps--;
+        this.resultArray.push(this.Commands.TURN_RIGHT);
+        this.pointsIncrease(this.startPointX, this.targetPointY);
+      } else if (this.startPointX > this.targetPointX && this.startPointY === this.targetPointY) {
+        this.direction = this.Directions.West;
+        this.steps--;
+        this.resultArray.push(this.Commands.TURN_LEFT);
+        this.pointsDecrease(this.startPointX, this.targetPointX);
+      }
+  }
+
+  calculationBlock(startPointX, startPointY, blockedPointX, blockedPointY) {
+    if (startPointX + 1 === +blockedPointX) {
       this.resultArray.push(this.Commands.TURN_RIGHT);
-      this.pointsXIncrease(startPointX, targetPointX);
-      this.direction = this.Directions.South;
-      this.steps -= 2;
       this.resultArray.push(this.Commands.TURN_RIGHT);
-      this.pointsYIncrease(startPointY, targetPointY);
-    } else if (startPointX > targetPointX && startPointY < targetPointY) {
-      this.direction = this.Directions.West;
-      this.resultArray.push(this.Commands.TURN_LEFT);
-      this.pointsXDecrease(startPointX, targetPointX);
-      this.direction = this.Directions.South;
-      this.steps -= 2;
-      this.resultArray.push(this.Commands.TURN_LEFT);
-      this.pointsYIncrease(startPointY, targetPointY);
-    } else if (startPointX > targetPointX && startPointY > targetPointY) {
-      this.pointsYDecrease(startPointY, targetPointY);
-      this.direction = this.Directions.West;
-      this.steps--;
-      this.resultArray.push(this.Commands.TURN_LEFT);
-      this.pointsXDecrease(startPointX, targetPointX);
-    } else if (startPointX < targetPointX && startPointY > targetPointY) {
-      this.pointsYDecrease(startPointY, targetPointY);
-      this.direction = this.Directions.East;
-      this.steps--;
+    } else if(startPointX - 1 === +blockedPointX) {
       this.resultArray.push(this.Commands.TURN_RIGHT);
-      this.pointsXIncrease(startPointX, targetPointX);
-    } else if (startPointX === targetPointX && startPointY < targetPointY) {
-      this.direction = this.Directions.East;
       this.resultArray.push(this.Commands.TURN_RIGHT);
-      this.direction = this.Directions.South;
-      this.steps -= 2;
-      this.resultArray.push(this.Commands.TURN_RIGHT);
-      this.pointsYIncrease(startPointY, targetPointY);
-    } else if (startPointX === targetPointX && startPointY > targetPointY) {
-      this.pointsYDecrease(startPointY, targetPointY);
-    } else if (startPointX < targetPointX && startPointY === targetPointY) {
-      this.direction = this.Directions.East;
-      this.steps--;
-      this.resultArray.push(this.Commands.TURN_RIGHT);
-      this.pointsXIncrease(startPointX, targetPointX);
-    } else if (startPointX > targetPointX && startPointY === targetPointY) {
-      this.direction = this.Directions.West;
-      this.steps--;
-      this.resultArray.push(this.Commands.TURN_LEFT);
-      this.pointsXDecrease(startPointX, targetPointX);
-    }
+    } 
+    return startPointX;
   }
 
 
@@ -204,11 +215,11 @@ export class AppComponent {
    * @param targetPointX 
    */
 
-  pointsXIncrease(startPointX, targetPointX) {
-    while (startPointX !== targetPointX) {
+  pointsIncrease(startPoint, targetPoint) {
+    while (startPoint !== targetPoint) {
       this.resultArray.push(this.Commands.MOVE_FORWARDS);
       this.steps--;
-      startPointX++;
+      startPoint++;
     }
   }
 
@@ -219,39 +230,11 @@ export class AppComponent {
    * @param targetPointX 
    */
 
-  pointsXDecrease(startPointX, targetPointX) {
-    while (startPointX !== targetPointX) {
+  pointsDecrease(startPoint, targetPoint) {
+    while (startPoint !== targetPoint) {
       this.resultArray.push(this.Commands.MOVE_FORWARDS);
       this.steps--;
-      startPointX--;
-    }
-  }
-
-  /**
-   * Функция увеличения значения стартовой точки по Y.
-   * @param startPointX 
-   * @param targetPointX 
-   */
-
-  pointsYIncrease(startPointY, targetPointY) {
-    while (startPointY !== targetPointY) {
-      this.resultArray.push(this.Commands.MOVE_FORWARDS);
-      this.steps--;
-      startPointY++;
-    }
-  }
-
-  /**
-   * Функция уменьшения значения стартовой точки по Y.
-   * @param startPointX 
-   * @param targetPointX 
-   */
-
-  pointsYDecrease(startPointY, targetPointY) {
-    while (startPointY !== targetPointY) {
-      this.resultArray.push(this.Commands.MOVE_FORWARDS);
-      this.steps--;
-      startPointY--;
+      startPoint--;
     }
   }
 
